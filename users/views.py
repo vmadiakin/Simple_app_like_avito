@@ -68,7 +68,15 @@ class UserDetailView(DetailView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UserCreateView(CreateView):
     model = User
-    fields = ['username', 'password', 'first_name', 'last_name', 'role', 'age', 'location']
+    fields = ['username', 'password', 'first_name', 'last_name', 'role', 'age']
+
+    def create_location(self, location_name):
+        parts = location_name.split(', ')
+        name = parts[0]
+        if len(parts) > 1 and parts[1].startswith('м.'):
+            name += ', ' + parts[1]
+        location, created = Location.objects.get_or_create(name=name, lat=0, lng=0)
+        return location
 
     def post(self, request, *args, **kwargs):
         request_data = json.loads(request.body)
@@ -79,11 +87,11 @@ class UserCreateView(CreateView):
         last_name = request_data.get('last_name', '')
         role = request_data.get('role', '')
         age = request_data.get('age', 0)
-        location_name = request_data.get('location', '')
-        lat = request_data.get('lat', '')
-        lng = request_data.get('lng', '')
+        locations = request_data.get('locations', [])
 
-        location, created = Location.objects.get_or_create(name=location_name, lat=lat, lng=lng)
+        location_name = ', '.join(locations)
+
+        location = self.create_location(location_name)
 
         user = User(
             username=username,
@@ -94,7 +102,6 @@ class UserCreateView(CreateView):
             age=age,
             location=location
         )
-
         user.save()
 
         response_data = {
@@ -104,7 +111,7 @@ class UserCreateView(CreateView):
             'last_name': user.last_name,
             'role': user.role,
             'age': user.age,
-            'location': user.location.name,
+            'location': user.location.name
         }
 
         return JsonResponse(response_data, status=200)
