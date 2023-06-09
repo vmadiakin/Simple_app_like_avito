@@ -4,7 +4,25 @@ from categories.models import Category
 from users.models import User
 
 
-class AdSerializer(serializers.ModelSerializer):
+class AdListSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(source='author.username')
+    category = serializers.StringRelatedField(source='category.name')
+
+    class Meta:
+        model = Ad
+        fields = "__all__"
+
+
+class AdDetailSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(source='author.username')
+    category = serializers.StringRelatedField(source='category.name')
+
+    class Meta:
+        model = Ad
+        fields = "__all__"
+
+
+class AdCreateSerializer(serializers.ModelSerializer):
     author_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         source='author',
@@ -15,17 +33,33 @@ class AdSerializer(serializers.ModelSerializer):
         source='category',
         write_only=True
     )
+    author = serializers.StringRelatedField(source='author.username')
+    category = serializers.StringRelatedField(source='category.name')
     image = serializers.ImageField(required=False)
-    author_name = serializers.StringRelatedField(source='author.username')
-    author_first_name = serializers.CharField(source='author.first_name', read_only=True)
-    category_name = serializers.StringRelatedField(source='category.name')
 
     class Meta:
         model = Ad
-        fields = ['id', 'name', 'author_id', 'author_name', 'author_first_name', 'price', 'description', 'is_published', 'image', 'category_id', 'category_name']
+        fields = "__all__"
 
-    def create(self, validated_data):
-        return super().create(validated_data)
+
+class AdUpdateSerializer(serializers.ModelSerializer):
+    author_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='author',
+        write_only=True
+    )
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source='category',
+        write_only=True
+    )
+    author = serializers.StringRelatedField(source='author.username')
+    category = serializers.StringRelatedField(source='category.name')
+    image = serializers.ImageField(required=False)
+
+    class Meta:
+        model = Ad
+        fields = "__all__"
 
 
 class UploadImageSerializer(serializers.ModelSerializer):
@@ -34,3 +68,9 @@ class UploadImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ad
         fields = ['image']
+
+
+class AdDestroySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ad
+        fields = ['id']

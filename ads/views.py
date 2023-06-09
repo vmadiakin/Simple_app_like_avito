@@ -3,11 +3,15 @@ from django.http import JsonResponse
 from django.views import View
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from ads.models import Ad
-from ads.serializers import AdSerializer, UploadImageSerializer
+from ads.permissions import IsAuthorOrModeratorOrAdmin
+from ads.serializers import AdListSerializer, AdDetailSerializer, AdCreateSerializer, AdUpdateSerializer, \
+    UploadImageSerializer, AdDestroySerializer
 
 
 class IndexView(View):
@@ -15,18 +19,9 @@ class IndexView(View):
         return JsonResponse({"status": "ok"})
 
 
-class AdsViewSet(ModelViewSet):
+class AdsListView(ListAPIView):
     queryset = Ad.objects.all().order_by('-price')
-    serializer_class = AdSerializer
-    parser_classes = [MultiPartParser, FormParser]
-
-    @action(detail=True, methods=['post'])
-    def upload_image(self, request, pk=None):
-        ad = self.get_object()
-        serializer = UploadImageSerializer(ad, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer_class = AdListSerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -44,3 +39,31 @@ class AdsViewSet(ModelViewSet):
         if price_from and price_to:
             queryset = queryset.filter(price__range=(price_from, price_to))
         return queryset
+
+
+class AdDetailView(RetrieveAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class AdCreateView(CreateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdCreateSerializer
+
+
+class AdUpdateView(UpdateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdUpdateSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrModeratorOrAdmin]
+
+
+class AdUploadImageView(UpdateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = UploadImageSerializer
+
+
+class AdDeleteView(DestroyAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdDestroySerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrModeratorOrAdmin]

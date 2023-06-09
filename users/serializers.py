@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from users.models import User, Location
+
+from ads.models import Ad
+from ads.serializers import AdListSerializer
+from users.models import User, Location, Selection
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -111,3 +114,45 @@ class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = '__all__'
+
+
+class SelectionCreateSerializer(serializers.ModelSerializer):
+    items = serializers.PrimaryKeyRelatedField(
+        queryset=Ad.objects.all(),
+        many=True
+    )
+
+    class Meta:
+        model = Selection
+        fields = '__all__'
+
+
+class SelectionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Selection
+        fields = ['id', 'name']
+
+
+class SelectionDetailSerializer(serializers.ModelSerializer):
+    items = AdListSerializer(many=True)
+
+    class Meta:
+        model = Selection
+        fields = '__all__'
+
+
+class SelectionUpdateSerializer(serializers.ModelSerializer):
+    items = serializers.PrimaryKeyRelatedField(
+        queryset=Ad.objects.all(),
+        many=True
+    )
+
+    class Meta:
+        model = Selection
+        fields = '__all__'
+
+
+class SelectionDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Selection
+        fields = ['id']

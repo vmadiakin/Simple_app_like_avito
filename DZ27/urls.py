@@ -20,12 +20,12 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 
-from ads.views import IndexView, AdsViewSet
-from users.views import LocationsViewSet
+from ads.views import IndexView
+from users.views import LocationsViewSet, SelectionCreateView, SelectionListView, SelectionDetailView, \
+    SelectionUpdateView, SelectionDeleteView
 
 router = routers.SimpleRouter()
 router.register('location', LocationsViewSet)
-router.register('ad', AdsViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +34,11 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('cat/', include('categories.urls')),
     path('user/', include('users.urls')),
+    path('selection/create/', SelectionCreateView.as_view()),
+    path('selection/', SelectionListView.as_view()),
+    path('selection/<int:pk>/', SelectionDetailView.as_view()),
+    path('selection/<int:pk>/update/', SelectionUpdateView.as_view()),
+    path('selection/<int:pk>/delete/', SelectionDeleteView.as_view()),
     path('location/<int:pk>/delete/', LocationsViewSet.as_view({'delete': 'destroy'})),
     path('location/<int:pk>/update/', LocationsViewSet.as_view({'patch': 'update'})),
     path('location/create/', LocationsViewSet.as_view({'post': 'create'})),
