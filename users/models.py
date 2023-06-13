@@ -1,4 +1,7 @@
+from datetime import date
+
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -15,6 +18,18 @@ class Location(models.Model):
         verbose_name_plural = 'Локации'
 
 
+def validate_minimum_age(value):
+    today = date.today()
+    minimum_age_date = today.replace(year=today.year - 9)
+    if value > minimum_age_date:
+        raise ValidationError('Пользователь должен быть старше 9 лет.')
+
+
+def validate_email_domain(value):
+    if value.endswith('@rambler.ru'):
+        raise ValidationError("Регистрация с адреса в домене rambler.ru запрещена.")
+
+
 class User(AbstractUser):
     MEMBER = "member"
     MODERATOR = "moderator"
@@ -24,9 +39,10 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
+    email = models.EmailField(unique=True, validators=[validate_email_domain])
     password = models.CharField(max_length=255)
     role = models.CharField(max_length=255, choices=ROLE, default=MEMBER)
-    age = models.IntegerField()
+    birth_date = models.DateField(validators=[validate_minimum_age])
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
 
     def __str__(self):

@@ -11,7 +11,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'age', 'location']
+        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'location']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -22,7 +22,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'age', 'location']
+        fields = ['id', 'first_name', 'last_name', 'username', 'role', 'location']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -35,7 +35,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'role', 'age', 'location']
+        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'role', 'location', 'birth_date', 'email']
 
     def get_location(self, obj):
         location_name = obj.location.name if obj.location else None
@@ -68,7 +68,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'role', 'age', 'location']
+        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'role', 'location']
         read_only_fields = ['id']  # Чтобы идентификатор пользователя был только для чтения
 
     def get_location(self, obj):
