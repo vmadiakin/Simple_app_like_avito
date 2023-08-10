@@ -1,0 +1,1 @@
+Simple app like Avito
